@@ -1,0 +1,11 @@
+SELECT
+    'C1' AS SOURCE_SYSTEM,
+    *
+FROM ss_silver.sapeast_ZCC_ACCNT_EMAIL
+
+UNION ALL
+
+SELECT
+    'C2' AS SOURCE_SYSTEM,
+    *
+FROM ss_silver.sapwest_ZCC_ACCNT_EMAIL

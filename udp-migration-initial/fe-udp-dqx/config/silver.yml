@@ -1,0 +1,44 @@
+# =====================================================================
+# SILVER TABLE CONFIGURATION REGISTRY
+# What's happening: Unified registry cataloging all target tables
+# across every source system in a single file. Tables are grouped
+# under their source system key. The active source system is resolved
+# at runtime via the pipeline.source_system spark conf parameter.
+#
+# To add a new source system: add a new top-level key under `tables`
+# (e.g. esriveg01p:) and list its tables below it — no other file changes
+# needed.
+#
+# To add a table to an existing system: add an entry under the
+# relevant source system key following the same pattern.
+#
+# Schema mapping (prod):
+#   webp_ivmsp        → schema "webp"
+#   esriveg01p        → schema "esriveg01p"
+#   ssp_lifecycle01p  → schema "ssp_lifecycle01p"
+# =====================================================================
+
+tables:
+  sap:
+    sapeast_FKKVKP:    
+      source_table: "sapeast_FKKVKP"
+      target_table: "sapeast_FKKVKP"
+
+    sapwest_FKKVKP:
+      source_table: "sapwest_FKKVKP"
+      target_table: "sapwest_FKKVKP"
+
+    sapeast_ZCC_ACCNT_EMAIL:
+      source_table: "sapeast_ZCC_ACCNT_EMAIL"
+      target_table: "sapeast_ZCC_ACCNT_EMAIL"
+    
+    sapwest_ZCC_ACCNT_EMAIL:
+      source_table: "sapwest_ZCC_ACCNT_EMAIL"
+      target_table: "sapwest_ZCC_ACCNT_EMAIL"
+    
+
+  # esri:
+  #   esri_UNM_ATTACHMENT_s:
+  #     source_table: "esri_UNM_ATTACHMENT_s"
+  #     target_table: "esri_UNM_ATTACHMENT_s"
+  #     exclude_columns: ""

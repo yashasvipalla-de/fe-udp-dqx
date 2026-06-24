@@ -1,0 +1,43 @@
+# # resources/silver_orchestration.job.yml
+# # ─────────────────────────────────────────────────────────────────────
+# # Silver Orchestration
+# # Silver pipeline → Tag silver tables
+# # ─────────────────────────────────────────────────────────────────────
+# resources:
+#   jobs:
+
+#     silver_orchestration:
+#       name: "Crew Mgmt — Silver Pipeline + Tagging"
+
+#       # ── Schedule (uncomment and adjust as needed) ─────────────────
+#       # schedule:
+#       #   quartz_cron_expression: "0 0 4 * * ?"   # Daily at 4:00 AM
+#       #   timezone_id: "America/New_York"
+#       #   pause_status: "UNPAUSED"
+
+#       # ── Notifications (uncomment to enable) ───────────────────────
+#       # email_notifications:
+#       #   on_failure:
+#       #     - team-data-engineering@fenetwork.com
+
+#       # ── Retry / timeout (uncomment to enable) ─────────────────────
+#       # max_concurrent_runs: 1
+#       # timeout_seconds: 7200  # 2 hours
+
+#       tasks:
+
+#         - task_key: "run_silver_pipeline"
+#           pipeline_task:
+#             pipeline_id: ${resources.pipelines.webp_ivmsp_silver_pipeline.id}
+
+#         - task_key: "tag_silver_tables"
+#           depends_on:
+#             - task_key: "run_silver_pipeline"
+#           notebook_task:
+#             notebook_path: ../src/04_governance/apply_uc_tags.py
+#             base_parameters:
+#               layer: "silver"
+#               catalog: ${var.silver_catalog}
+#               schema: ${var.silver_schema_webp}
+#               config_path: "config/silver.yml"
+#               source_system: "webp_ivmsp"

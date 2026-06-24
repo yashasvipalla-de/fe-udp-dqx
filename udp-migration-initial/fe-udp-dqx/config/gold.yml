@@ -1,0 +1,24 @@
+# =====================================================================
+# GOLD TABLE CONFIGURATION REGISTRY
+# What's happening: Unified registry cataloging all gold-layer tables
+# across every source system. Gold tables are materialized views that
+# read from the corresponding silver tables — no DQX validation is
+# applied at this layer.
+#
+# To add a table: add an entry under the relevant source system key
+# following the same pattern used in silver.yml.
+# =====================================================================
+
+tables:
+  customer:
+    araw_sapccs_FKKVKP:
+      source_tables:
+        - sapeast_FKKVKP
+        - sapwest_FKKVKP
+      target_table: araw_sapccs_FKKVKP
+    
+    araw_sapccs_ZCC_ACCNT_EMAIL:
+      source_tables:
+        - sapeast_ZCC_ACCNT_EMAIL
+        - sapwest_ZCC_ACCNT_EMAIL
+      target_table: araw_sapccs_ZCC_ACCNT_EMAIL

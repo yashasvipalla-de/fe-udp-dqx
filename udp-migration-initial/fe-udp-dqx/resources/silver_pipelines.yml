@@ -1,0 +1,103 @@
+# resources/silver_pipelines.yml
+resources:
+  pipelines:
+
+    SAP_bundle_silver_pipeline:
+      name: "SAP Silver Pipeline"
+      catalog: ${var.silver_catalog}
+      target: ${var.silver_schema_sap}
+      photon: true
+      serverless: true 
+      libraries:
+        - notebook:
+            path: ../src/01_silver/silver.py
+      configuration:
+        pipelines.incompatibleViewCheck.enabled: "false"
+        pipeline.bronze_catalog: ${var.bronze_catalog}
+        pipeline.bronze_schema: ${var.bronze_schema_sap}
+        
+        # Swapped to silver tracking tokens
+        pipeline.silver_catalog: ${var.silver_catalog}
+        pipeline.silver_schema: ${var.silver_schema_sap}
+        
+        pipeline.quarantine_catalog: ${var.quarantine_catalog}
+        pipeline.quarantine_schema: ${var.quarantine_schema}
+        pipeline.metrics_catalog: ${var.metrics_catalog}
+        pipeline.metrics_schema: ${var.metrics_schema}
+        pipeline.source_system: "sap" 
+      environment:
+        dependencies:
+          - -r ../requirements.txt
+
+    # ─── ESRI VEGETATION SOURCE SYSTEM ───
+    # Uncomment when ready to onboard esriveg01p tables.
+    # Requires: config/silver.yml entry under "esriveg01p",
+    #           contracts/01_silver/esriveg01p/<table>.yml,
+    #           src/01_silver/sql/esriveg01p/<table>.sql
+    #
+    # esriveg01p_silver_pipeline:
+    #   name: "ESRI Vegetation Silver Pipeline"
+    #   catalog: ${var.silver_catalog}
+    #   target: ${var.silver_schema_esriveg01p}
+    #   photon: true
+    #   serverless: true
+    #   libraries:
+    #     - notebook:
+    #         path: ../src/01_silver/silver.py
+    #   configuration:
+    #     pipelines.incompatibleViewCheck.enabled: "false"
+    #     pipeline.bronze_catalog: ${var.bronze_catalog}
+    #     pipeline.bronze_schema: ${var.bronze_schema_esriveg01p}
+    #     pipeline.silver_catalog: ${var.silver_catalog}
+    #     pipeline.silver_schema: ${var.silver_schema_esriveg01p}
+    #     pipeline.quarantine_catalog: ${var.quarantine_catalog}
+    #     pipeline.quarantine_schema: ${var.quarantine_schema}
+    #     pipeline.metrics_catalog: ${var.metrics_catalog}
+    #     pipeline.metrics_schema: ${var.metrics_schema}
+    #     pipeline.source_system: "esriveg01p"
+    #   environment:
+    #     dependencies:
+    #       - -r ../requirements.txt
+
+    # ─── SSP LIFECYCLE SOURCE SYSTEM ───
+    # Uncomment when ready to onboard ssp_lifecycle01p tables.
+    # Requires: config/silver.yml entry under "ssp_lifecycle01p",
+    #           contracts/01_silver/ssp_lifecycle01p/<table>.yml,
+    #           src/01_silver/sql/ssp_lifecycle01p/<table>.sql
+    #
+    # ssp_lifecycle01p_silver_pipeline:
+    #   name: "SSP Lifecycle Silver Pipeline"
+    #   catalog: ${var.silver_catalog}
+    #   target: ${var.silver_schema_ssp_lifecycle01p}
+    #   photon: true
+    #   serverless: true
+    #   libraries:
+    #     - notebook:
+    #         path: ../src/01_silver/silver.py
+    #   configuration:
+    #     pipelines.incompatibleViewCheck.enabled: "false"
+    #     pipeline.bronze_catalog: ${var.bronze_catalog}
+    #     pipeline.bronze_schema: ${var.bronze_schema_ssp_lifecycle01p}
+    #     pipeline.silver_catalog: ${var.silver_catalog}
+    #     pipeline.silver_schema: ${var.silver_schema_ssp_lifecycle01p}
+    #     pipeline.quarantine_catalog: ${var.quarantine_catalog}
+    #     pipeline.quarantine_schema: ${var.quarantine_schema}
+    #     pipeline.metrics_catalog: ${var.metrics_catalog}
+    #     pipeline.metrics_schema: ${var.metrics_schema}
+    #     pipeline.source_system: "ssp_lifecycle01p"
+    #   environment:
+    #     dependencies:
+    #       - -r ../requirements.txt
+
+    # global_dqx_governance_pipeline:
+    #   name: "Global DQX Governance Pipeline"
+    #   catalog: ${var.metrics_catalog}
+    #   target: ${var.metrics_schema}
+    #   photon: true
+    #   serverless: true
+    #   libraries:
+    #     - notebook:
+    #         path: ../src/03_monitoring/dqx_summary_metrics.py
+    #   configuration:
+    #     pipeline.metrics_catalog: ${var.metrics_catalog}
+    #     pipeline.metrics_schema: ${var.metrics_schema}

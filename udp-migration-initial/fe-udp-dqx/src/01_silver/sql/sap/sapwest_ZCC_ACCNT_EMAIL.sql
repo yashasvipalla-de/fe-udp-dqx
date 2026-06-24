@@ -1,0 +1,4 @@
+SELECT
+    VKONT,
+    SMTP_ADDR
+FROM __bronze__.sapwest_ZCC_ACCNT_EMAIL

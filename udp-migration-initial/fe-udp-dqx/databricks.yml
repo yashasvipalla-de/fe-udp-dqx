@@ -1,0 +1,170 @@
+# =============================================================================
+# Crew Management — Synapse→Databricks migration · Declarative Automation Bundle
+# -----------------------------------------------------------------------------
+# Deploys the Lakeflow silver pipelines + DQX governance pipeline consistently
+# across dev / qa / prod.
+#
+# CONTRIBUTOR MODEL — how to add or change an environment-specific value:
+#   1. DECLARE it once under `variables:` (description only unless a safe default
+#      is appropriate).
+#   2. SET its concrete value per environment under `targets.<env>.variables:`.
+#
+# SCHEMA MODEL — Per-source-system schemas:
+#   Bronze and silver layers use separate schemas for each source system
+#   (webp, esriveg01p, ssp_lifecycle01p). In dev, all resolve to shared
+#   sandbox schemas (sbx_bronze, sbx_silver, etc.). In prod/qa, each maps
+#   to its real schema name.
+# =============================================================================
+
+bundle:
+  name: fe-dqx
+include:
+  - resources/*.yml
+
+# ─── VARIABLE DECLARATIONS ───────────────────────────────────────────────────
+variables:
+  # -- Shared catalogs (same catalog houses all source-system schemas) --
+  bronze_catalog:
+    description: "Bronze Ingestion Catalog (shared across all source systems)"
+  silver_catalog:
+    description: "Silver Clean Destination Catalog (shared across all source systems)"
+  gold_catalog:
+    description: "Gold Aggregated Business Catalog (shared across all source systems)"
+
+  # -- Per-source-system bronze schemas --
+  bronze_schema_sap:
+    description: "Bronze schema for SAP source system"
+  bronze_schema_esri:
+    description: "Bronze schema for ESRI Vegetation source system"
+
+  # -- Per-source-system silver schemas --
+  silver_schema_sap:
+    description: "Silver schema for SAP source system"
+  silver_schema_esri:
+    description: "Silver schema for ESRI Vegetation source system"
+
+
+  # -- Per-source-system gold schemas --
+  gold_schema_customer:
+    description: "Gold schema for SAP source system"
+  gold_schema_wmi:
+    description: "Gold schema for ESRI Vegetation source system"
+
+  # -- Shared infrastructure schemas (DQX quarantine + metrics) --
+  quarantine_catalog:
+    description: "Data Quality Quarantine Catalog"
+  quarantine_schema:
+    description: "Data Quality Quarantine Schema"
+
+  metrics_catalog:
+    description: "DQX Platform Metrics Catalog"
+  metrics_schema:
+    description: "DQX Platform Metrics Schema"
+
+  # -- Infrastructure / deployment settings --
+  root_path:
+    description: "Workspace root path where this bundle's state and files deploy."
+  cluster_policy_id:
+    description: "Cluster policy ID for classic compute (serverless pipelines need none)."
+    default: ""
+  service_principal:
+    description: "Service principal application ID for non-dev deployments."
+    default: ""
+
+workspace:
+  root_path: ${var.root_path}
+
+# ─── TARGETS / ENVIRONMENTS ──────────────────────────────────────────────────
+targets:
+  # dev — personal development sandbox
+  # All source-system schemas collapse to shared sbx_* schemas for convenience.
+  dev:
+    default: true
+    mode: development
+    variables:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/dev
+      cluster_policy_id: ""
+      service_principal: ""
+
+      # Shared catalogs
+      bronze_catalog: "sandbox"
+      silver_catalog: "sandbox"
+      gold_catalog: "sandbox"
+
+      # Per-source-system bronze schemas 
+      bronze_schema_sap: "ss_bronze"
+      bronze_schema_esri: "ss_bronze"
+
+      # Per-source-system silver schemas 
+      silver_schema_sap: "ss_silver"
+      silver_schema_esri: "ss_silver"
+
+      # Per-source-system gold schemas
+      gold_schema_customer: "ss_customer"
+      gold_schema_wmi: "ss_wmi"
+
+      # Shared infrastructure
+      quarantine_catalog: "sandbox"
+      quarantine_schema: "ss_quarantine"
+      metrics_catalog: "sandbox"
+      metrics_schema: "ss_quality_monitoring"
+
+  # qa — staging / pre-production
+  qa:
+    mode: production
+    variables:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/qa
+      cluster_policy_id: ""
+      service_principal: ""
+
+      bronze_catalog: ""
+      silver_catalog: ""
+      gold_catalog: ""
+
+ 
+      bronze_schema_webp: "webp"
+      bronze_schema_esriveg01p: "esriveg01p"
+      bronze_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+
+      silver_schema_webp: "webp"
+      silver_schema_esriveg01p: "esriveg01p"
+      silver_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+
+      gold_schema_webp: "webp"
+      gold_schema_esriveg01p: "esriveg01p"
+      gold_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+
+      quarantine_catalog: ""
+      quarantine_schema: ""
+      metrics_catalog: ""
+      metrics_schema: ""
+
+
+  prod:
+    mode: production
+    variables:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/prod
+      cluster_policy_id: ""
+      service_principal: ""
+
+      bronze_catalog: ""
+      silver_catalog: ""
+      gold_catalog: ""
+
+
+      bronze_schema_webp: "webp"
+      bronze_schema_esriveg01p: "esriveg01p"
+      bronze_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+
+      silver_schema_webp: "webp"
+      silver_schema_esriveg01p: "esriveg01p"
+      silver_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+
+      gold_schema_webp: "webp"
+      gold_schema_esriveg01p: "esriveg01p"
+      gold_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+
+      quarantine_catalog: ""
+      quarantine_schema: ""
+      metrics_catalog: ""
+      metrics_schema: ""
