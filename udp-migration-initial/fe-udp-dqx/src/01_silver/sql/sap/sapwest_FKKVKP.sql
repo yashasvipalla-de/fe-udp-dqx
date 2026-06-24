@@ -1,4 +1,5 @@
 SELECT
     VKONT,
-    GPART
+    GPART,
+    current_timestamp() AS processed_time
 FROM __bronze__.sapwest_FKKVKP

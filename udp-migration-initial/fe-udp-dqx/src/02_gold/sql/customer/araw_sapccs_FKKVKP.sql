@@ -1,11 +1,15 @@
 SELECT
     'C1' AS SOURCE_SYSTEM,
-    *
-FROM ss_silver.sapeast_FKKVKP
+    VKONT,
+    GPART,
+    processed_time
+FROM __silver__.sapeast_FKKVKP
 
 UNION ALL
 
 SELECT
     'C2' AS SOURCE_SYSTEM,
-    *
-FROM ss_silver.sapwest_FKKVKP
+    VKONT,
+    GPART,
+    processed_time
+FROM __silver__.sapwest_FKKVKP

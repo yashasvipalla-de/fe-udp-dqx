@@ -12,13 +12,45 @@
 tables:
   customer:
     araw_sapccs_FKKVKP:
+      operation_type: singlestore_view
       source_tables:
         - sapeast_FKKVKP
         - sapwest_FKKVKP
       target_table: araw_sapccs_FKKVKP
-    
+      sql_file: araw_sapccs_FKKVKP.sql
+
     araw_sapccs_ZCC_ACCNT_EMAIL:
+      operation_type: singlestore_view
       source_tables:
         - sapeast_ZCC_ACCNT_EMAIL
         - sapwest_ZCC_ACCNT_EMAIL
       target_table: araw_sapccs_ZCC_ACCNT_EMAIL
+      sql_file: araw_sapccs_ZCC_ACCNT_EMAIL.sql
+
+    table_email:
+      operation_type: delta_type1
+      source_tables:
+        - sapeast_ZCC_ACCNT_EMAIL
+        - sapwest_ZCC_ACCNT_EMAIL
+      target_table: table_email
+      sql_file: table_email.sql
+      keys:
+        - SOURCE_SYSTEM
+        - VKONT
+      sequence_by: processed_time
+      except_columns:
+        - processed_time
+
+    # table_address:
+    #   operation_type: delta_type1
+    #   source_tables:
+    #     - sapeast_ZCC_ACCNT_EMAIL
+    #     - sapwest_ZCC_ACCNT_EMAIL
+    #   target_table: table_email
+    #   sql_file: table_email.sql
+    #   keys:
+    #     - SOURCE_SYSTEM
+    #     - VKONT
+    #   sequence_by: processed_time
+    #   except_columns:
+    #     - processed_time
