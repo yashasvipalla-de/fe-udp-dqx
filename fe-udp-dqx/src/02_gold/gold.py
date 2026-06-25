@@ -285,3 +285,4 @@ for table_name, table_config in tables_dictionary.items():
     print(
         f"[GOLD] Registered operation_type={table_config.get('operation_type')} for table={table_name}"
     )
+
