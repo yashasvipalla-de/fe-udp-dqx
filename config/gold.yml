@@ -19,13 +19,28 @@ tables:
       target_table: araw_sapccs_FKKVKP
       sql_file: araw_sapccs_FKKVKP.sql
 
+    araw_sapccs_BUT000:
+      operation_type: singlestore_view
+      source_tables:
+        - sapeast_BUT000
+      target_table: araw_sapccs_BUT000
+      sql_file: araw_sapccs_BUT000.sql
+
     araw_sapccs_ZCC_ACCNT_EMAIL:
       operation_type: singlestore_view
       source_tables:
         - sapeast_ZCC_ACCNT_EMAIL
-        - sapwest_ZCC_ACCNT_EMAIL
       target_table: araw_sapccs_ZCC_ACCNT_EMAIL
       sql_file: araw_sapccs_ZCC_ACCNT_EMAIL.sql
+
+    ff_IVR_Invitation_v:
+      operation_type: singlestore_view
+      source_tables:
+        - araw_sapccs_FKKVKP
+        - araw_sapccs_BUT000
+        - araw_sapccs_ZCC_ACCNT_EMAIL
+      target_table: ff_IVR_Invitation_v
+      sql_file: ff_IVR_Invitation_v.sql
 
     table_email:
       operation_type: delta_type1

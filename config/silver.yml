@@ -20,21 +20,29 @@
 
 tables:
   sap:
-    sapeast_FKKVKP:    
+    sapeast_FKKVKP:    ## Contract Account Number, Business Partner Number
+      description: "SAP East contract account to business partner mapping."
       source_table: "sapeast_FKKVKP"
       target_table: "sapeast_FKKVKP"
+      primary_keys:
+        - VKONT
 
     sapwest_FKKVKP:
+      description: "SAP West contract account to business partner mapping."
       source_table: "sapwest_FKKVKP"
       target_table: "sapwest_FKKVKP"
+      primary_keys:
+        - VKONT
 
-    sapeast_ZCC_ACCNT_EMAIL:
+    sapeast_BUT000:
+      source_table: "sapeast_BUT000"
+      target_table: "sapeast_BUT000"
+      exclude_columns: ""
+
+    sapeast_ZCC_ACCNT_EMAIL: ## Contract Account Number, smtp_email_address
+      description: "SAP East account email table."
       source_table: "sapeast_ZCC_ACCNT_EMAIL"
       target_table: "sapeast_ZCC_ACCNT_EMAIL"
-    
-    sapwest_ZCC_ACCNT_EMAIL:
-      source_table: "sapwest_ZCC_ACCNT_EMAIL"
-      target_table: "sapwest_ZCC_ACCNT_EMAIL"
     
 
   # esri:
