@@ -344,4 +344,3 @@ def aggregate_system_metrics():
             master_df = master_df.unionAll(table_metrics_df)
 
     return master_df
-
