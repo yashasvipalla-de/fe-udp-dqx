@@ -1,11 +1,10 @@
 # Databricks notebook source
 # DBTITLE 1,Gold Layer — Materialized Views from Silver
 # =====================================================================
-# GOLD LAYER — MATERIALIZED VIEWS (NO DQX VALIDATION)
+# GOLD LAYER — MATERIALIZED VIEWS
 # What's happening: This notebook reads SQL transformation files from
 # src/02_gold/sql/<source_system>/<table>.sql and registers each as a
-# materialized view in the gold catalog and schema. Unlike silver, there
-# are no DQX rules, no quarantine tables, and no metrics — just clean
+# materialized view in the gold catalog and schema. Just clean
 # business-ready transformations promoted from silver.
 # =====================================================================
 
@@ -74,6 +73,48 @@ if not tables_dictionary:
 def safe_identifier(value):
     return re.sub(r"[^A-Za-z0-9_]", "_", value).lower()
 
+def render_sql_parameters(raw_sql_query, sql_parameters, sql_file_path):
+    """
+    Replaces placeholders like ${PARAM_NAME} using values from gold.yml.
+
+    Example:
+      ${HASH_BITS}    -> 256
+      ${EMAIL_FILTER} -> ZCC_ACCNT_EMAIL.SMTP_ADDR IS NOT NULL
+    """
+
+    resolved_sql = raw_sql_query
+    sql_parameters = sql_parameters or {}
+
+    for parameter_name, parameter_value in sql_parameters.items():
+        placeholder = "${" + parameter_name + "}"
+        resolved_sql = resolved_sql.replace(placeholder, str(parameter_value))
+
+    unresolved_matches = re.findall(r"\$\{[A-Za-z0-9_]+\}", resolved_sql)
+
+    if unresolved_matches:
+        raise ValueError(
+            f"Unresolved SQL parameter(s) {unresolved_matches} found in {sql_file_path}. "
+            f"Configured sql_parameters are: {list(sql_parameters.keys())}"
+        )
+
+    return resolved_sql
+
+def resolve_gold_placeholders_batch(raw_sql_query, source_table_names, sql_file_path):
+    resolved_sql = raw_sql_query
+
+    for source_table_name in source_table_names:
+        resolved_sql = resolved_sql.replace(
+            f"__gold__.{source_table_name}",
+            f"`{GLOBAL_GOLD_CATALOG}`.`{GLOBAL_GOLD_SCHEMA}`.`{source_table_name}`",
+        )
+
+    if "__gold__." in resolved_sql:
+        raise ValueError(
+            f"Unresolved __gold__ placeholder found in SQL file: {sql_file_path}. "
+            f"Configured source tables are: {source_table_names}"
+        )
+
+    return resolved_sql
 
 def get_source_tables(table_config_name, table_configuration):
     source_tables = table_configuration.get("source_tables")
@@ -104,17 +145,6 @@ def read_sql_file(source_system_name, sql_file_name):
 
     if not raw_sql_query:
         raise ValueError(f"Gold SQL file is empty: {sql_file_path}")
-
-    forbidden_commands = ["TRUNCATE ", "INSERT ", "MERGE ", "DELETE ", "UPDATE ", "DROP ", "CREATE "]
-
-    upper_sql = raw_sql_query.upper()
-
-    for command in forbidden_commands:
-        if command in upper_sql:
-            raise ValueError(
-                f"Gold SQL file must be SELECT-only for Lakeflow. "
-                f"Found forbidden command '{command.strip()}' in {sql_file_path}"
-            )
 
     return raw_sql_query, sql_file_path
 
@@ -171,20 +201,38 @@ def build_singlestore_view(table_config_name, table_configuration):
 
     source_table_names = get_source_tables(table_config_name, table_configuration)
 
+    sql_parameters = table_configuration.get("sql_parameters", {}) or {}
+
     raw_sql_query, sql_file_path = read_sql_file(
         source_system_name,
         sql_file_name,
     )
 
-    resolved_sql = resolve_silver_placeholders_batch(
+    parameterized_sql = render_sql_parameters(
         raw_sql_query,
-        source_table_names,
+        sql_parameters,
         sql_file_path,
     )
 
+    resolved_sql = parameterized_sql
+
+    if "__silver__." in resolved_sql:
+        resolved_sql = resolve_silver_placeholders_batch(
+            resolved_sql,
+            source_table_names,
+            sql_file_path,
+        )
+
+    if "__gold__." in resolved_sql:
+        resolved_sql = resolve_gold_placeholders_batch(
+            resolved_sql,
+            source_table_names,
+            sql_file_path,
+        )
+
     @dp.materialized_view(
         name=f"{GLOBAL_GOLD_CATALOG}.{GLOBAL_GOLD_SCHEMA}.{target_table_name}",
-        comment=f"Gold SingleStore view conversion for {table_config_name}",
+        comment=f"Gold materialized view for {table_config_name}",
     )
     def gold_singlestore_view(sql_expression=resolved_sql):
         return spark.sql(sql_expression)
@@ -265,10 +313,10 @@ def build_gold_pipeline(table_config_name, table_configuration):
 
     operation_type = table_configuration.get(
         "operation_type",
-        "singlestore_view",
+        "materialized_view",
     )
 
-    if operation_type == "singlestore_view":
+    if operation_type == "materialized_view":
         build_singlestore_view(table_config_name, table_configuration)
 
     elif operation_type == "delta_type1":

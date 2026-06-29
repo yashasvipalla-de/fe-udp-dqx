@@ -2,8 +2,7 @@
 # GOLD TABLE CONFIGURATION REGISTRY
 # What's happening: Unified registry cataloging all gold-layer tables
 # across every source system. Gold tables are materialized views that
-# read from the corresponding silver tables — no DQX validation is
-# applied at this layer.
+# read from the corresponding silver tables
 #
 # To add a table: add an entry under the relevant source system key
 # following the same pattern used in silver.yml.
@@ -11,61 +10,25 @@
 
 tables:
   customer:
-    araw_sapccs_FKKVKP:
-      operation_type: singlestore_view
+    customer_contact_summary:
+      operation_type: materialized_view
       source_tables:
-        - sapeast_FKKVKP
-        - sapwest_FKKVKP
-      target_table: araw_sapccs_FKKVKP
-      sql_file: araw_sapccs_FKKVKP.sql
+        - customer_account
+        - customer_profile
+        - customer_email_contact
+      target_table: customer_contact_summary
+      sql_file: customer_contact_summary.sql
 
-    araw_sapccs_BUT000:
-      operation_type: singlestore_view
+      sql_parameters:
+        HASH_BITS: "256"
+        ACCOUNT_FILTER: "ACCOUNT.ACCOUNT_STATUS = 'ACTIVE'"
+        EMAIL_FILTER: "EMAIL.EMAIL_STATUS = 'VALID' AND EMAIL.PREFERRED_EMAIL_FLAG = 'Y'"
+
+
+    customer_account_profile_summary:
+      operation_type: materialized_view
       source_tables:
-        - sapeast_BUT000
-      target_table: araw_sapccs_BUT000
-      sql_file: araw_sapccs_BUT000.sql
-
-    araw_sapccs_ZCC_ACCNT_EMAIL:
-      operation_type: singlestore_view
-      source_tables:
-        - sapeast_ZCC_ACCNT_EMAIL
-      target_table: araw_sapccs_ZCC_ACCNT_EMAIL
-      sql_file: araw_sapccs_ZCC_ACCNT_EMAIL.sql
-
-    ff_IVR_Invitation_v:
-      operation_type: singlestore_view
-      source_tables:
-        - araw_sapccs_FKKVKP
-        - araw_sapccs_BUT000
-        - araw_sapccs_ZCC_ACCNT_EMAIL
-      target_table: ff_IVR_Invitation_v
-      sql_file: ff_IVR_Invitation_v.sql
-
-    table_email:
-      operation_type: delta_type1
-      source_tables:
-        - sapeast_ZCC_ACCNT_EMAIL
-        - sapwest_ZCC_ACCNT_EMAIL
-      target_table: table_email
-      sql_file: table_email.sql
-      keys:
-        - SOURCE_SYSTEM
-        - VKONT
-      sequence_by: processed_time
-      except_columns:
-        - processed_time
-
-    # table_address:
-    #   operation_type: delta_type1
-    #   source_tables:
-    #     - sapeast_ZCC_ACCNT_EMAIL
-    #     - sapwest_ZCC_ACCNT_EMAIL
-    #   target_table: table_email
-    #   sql_file: table_email.sql
-    #   keys:
-    #     - SOURCE_SYSTEM
-    #     - VKONT
-    #   sequence_by: processed_time
-    #   except_columns:
-    #     - processed_time
+        - customer_account
+        - customer_profile
+      target_table: customer_account_profile_summary
+      sql_file: customer_account_profile_summary.sql

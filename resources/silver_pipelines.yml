@@ -1,103 +1,98 @@
 # resources/silver_pipelines.yml
+
 resources:
   pipelines:
 
-    SAP_bundle_silver_pipeline:
-      name: "SAP Silver Pipeline"
+    oracle_cis_silver_pipeline:
+      name: "Oracle CIS Silver Pipeline"
       catalog: ${var.silver_catalog}
-      target: ${var.silver_schema_sap}
+      target: ${var.silver_schema_oracis01p}
       photon: true
-      serverless: true 
+      serverless: true
+
       libraries:
         - notebook:
             path: ../src/01_silver/silver.py
+
       configuration:
         pipelines.incompatibleViewCheck.enabled: "false"
+
+        # Bronze source
         pipeline.bronze_catalog: ${var.bronze_catalog}
-        pipeline.bronze_schema: ${var.bronze_schema_sap}
-        
-        # Swapped to silver tracking tokens
+        pipeline.bronze_schema: ${var.bronze_schema_oracis01p}
+
+        # Silver target
         pipeline.silver_catalog: ${var.silver_catalog}
-        pipeline.silver_schema: ${var.silver_schema_sap}
-        
+        pipeline.silver_schema: ${var.silver_schema_sfcrm01p}
+
+        # Quarantine target
         pipeline.quarantine_catalog: ${var.quarantine_catalog}
         pipeline.quarantine_schema: ${var.quarantine_schema}
+
+        # DQX metrics target
         pipeline.metrics_catalog: ${var.metrics_catalog}
         pipeline.metrics_schema: ${var.metrics_schema}
-        pipeline.source_system: "sap" 
+
+        # Must match top-level key in config/silver.yml
+        pipeline.source_system: "oracis01p"
+
       environment:
         dependencies:
           - -r ../requirements.txt
 
-    # ─── ESRI VEGETATION SOURCE SYSTEM ───
-    # Uncomment when ready to onboard esriveg01p tables.
-    # Requires: config/silver.yml entry under "esriveg01p",
-    #           contracts/01_silver/esriveg01p/<table>.yml,
-    #           src/01_silver/sql/esriveg01p/<table>.sql
-    #
-    # esriveg01p_silver_pipeline:
-    #   name: "ESRI Vegetation Silver Pipeline"
+
+    # salesforce_crm_silver_pipeline:
+    #   name: "Salesforce CRM Silver Pipeline"
     #   catalog: ${var.silver_catalog}
-    #   target: ${var.silver_schema_esriveg01p}
+    #   target: ${var.silver_schema_sfcrm01p}
     #   photon: true
     #   serverless: true
+
     #   libraries:
     #     - notebook:
     #         path: ../src/01_silver/silver.py
+
     #   configuration:
     #     pipelines.incompatibleViewCheck.enabled: "false"
+
+    #     # Bronze source
     #     pipeline.bronze_catalog: ${var.bronze_catalog}
-    #     pipeline.bronze_schema: ${var.bronze_schema_esriveg01p}
+    #     pipeline.bronze_schema: ${var.bronze_schema_sfcrm01p}
+
+    #     # Silver target
     #     pipeline.silver_catalog: ${var.silver_catalog}
-    #     pipeline.silver_schema: ${var.silver_schema_esriveg01p}
+    #     pipeline.silver_schema: ${var.silver_schema_sfcrm01p}
+
+    #     # Quarantine target
     #     pipeline.quarantine_catalog: ${var.quarantine_catalog}
     #     pipeline.quarantine_schema: ${var.quarantine_schema}
+
+    #     # DQX metrics target
     #     pipeline.metrics_catalog: ${var.metrics_catalog}
     #     pipeline.metrics_schema: ${var.metrics_schema}
-    #     pipeline.source_system: "esriveg01p"
+
+    #     # Must match top-level key in config/silver.yml
+    #     pipeline.source_system: "sfcrm01p"
+
     #   environment:
     #     dependencies:
     #       - -r ../requirements.txt
 
-    # ─── SSP LIFECYCLE SOURCE SYSTEM ───
-    # Uncomment when ready to onboard ssp_lifecycle01p tables.
-    # Requires: config/silver.yml entry under "ssp_lifecycle01p",
-    #           contracts/01_silver/ssp_lifecycle01p/<table>.yml,
-    #           src/01_silver/sql/ssp_lifecycle01p/<table>.sql
-    #
-    # ssp_lifecycle01p_silver_pipeline:
-    #   name: "SSP Lifecycle Silver Pipeline"
-    #   catalog: ${var.silver_catalog}
-    #   target: ${var.silver_schema_ssp_lifecycle01p}
-    #   photon: true
-    #   serverless: true
-    #   libraries:
-    #     - notebook:
-    #         path: ../src/01_silver/silver.py
-    #   configuration:
-    #     pipelines.incompatibleViewCheck.enabled: "false"
-    #     pipeline.bronze_catalog: ${var.bronze_catalog}
-    #     pipeline.bronze_schema: ${var.bronze_schema_ssp_lifecycle01p}
-    #     pipeline.silver_catalog: ${var.silver_catalog}
-    #     pipeline.silver_schema: ${var.silver_schema_ssp_lifecycle01p}
-    #     pipeline.quarantine_catalog: ${var.quarantine_catalog}
-    #     pipeline.quarantine_schema: ${var.quarantine_schema}
-    #     pipeline.metrics_catalog: ${var.metrics_catalog}
-    #     pipeline.metrics_schema: ${var.metrics_schema}
-    #     pipeline.source_system: "ssp_lifecycle01p"
-    #   environment:
-    #     dependencies:
-    #       - -r ../requirements.txt
 
+    # Optional: Global DQX Governance Pipeline
+    # Uncomment when you want to aggregate metrics across all source-system pipelines.
+    #
     # global_dqx_governance_pipeline:
     #   name: "Global DQX Governance Pipeline"
     #   catalog: ${var.metrics_catalog}
     #   target: ${var.metrics_schema}
     #   photon: true
     #   serverless: true
+    #
     #   libraries:
     #     - notebook:
     #         path: ../src/03_monitoring/dqx_summary_metrics.py
+    #
     #   configuration:
     #     pipeline.metrics_catalog: ${var.metrics_catalog}
     #     pipeline.metrics_schema: ${var.metrics_schema}
