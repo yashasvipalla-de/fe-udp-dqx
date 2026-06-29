@@ -19,34 +19,29 @@
 # =====================================================================
 
 tables:
-  sap:
-    sapeast_FKKVKP:    ## Contract Account Number, Business Partner Number
-      description: "SAP East contract account to business partner mapping."
-      source_table: "sapeast_FKKVKP"
-      target_table: "sapeast_FKKVKP"
+  oracis01p:
+    customer_account:
+      description: "Customer account table containing account status and service location details."
+      source_table: "customer_account"
+      target_table: "customer_account"
       primary_keys:
-        - VKONT
-
-    sapwest_FKKVKP:
-      description: "SAP West contract account to business partner mapping."
-      source_table: "sapwest_FKKVKP"
-      target_table: "sapwest_FKKVKP"
-      primary_keys:
-        - VKONT
-
-    sapeast_BUT000:
-      source_table: "sapeast_BUT000"
-      target_table: "sapeast_BUT000"
+        - ACCOUNT_ID
       exclude_columns: ""
 
-    sapeast_ZCC_ACCNT_EMAIL: ## Contract Account Number, smtp_email_address
-      description: "SAP East account email table."
-      source_table: "sapeast_ZCC_ACCNT_EMAIL"
-      target_table: "sapeast_ZCC_ACCNT_EMAIL"
-    
+    customer_profile:
+      description: "Customer profile table containing customer name and customer type details."
+      source_table: "customer_profile"
+      target_table: "customer_profile"
+      primary_keys:
+        - CUSTOMER_ID
 
-  # esri:
-  #   esri_UNM_ATTACHMENT_s:
-  #     source_table: "esri_UNM_ATTACHMENT_s"
-  #     target_table: "esri_UNM_ATTACHMENT_s"
-  #     exclude_columns: ""
+    customer_email_contact:
+      description: "Customer email contact table containing preferred email information."
+      source_table: "customer_email_contact"
+      target_table: "customer_email_contact"
+      primary_keys:
+        - ACCOUNT_ID
+        - EMAIL_ADDRESS
+    
+  # sfcrm01p:
+    #### define tables

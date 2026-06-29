@@ -1,5 +1,5 @@
 # =============================================================================
-# Crew Management — Synapse→Databricks migration · Declarative Automation Bundle
+# Singlestore UDP —> Databricks migration · Declarative Automation Bundle
 # -----------------------------------------------------------------------------
 # Deploys the Lakeflow silver pipelines + DQX governance pipeline consistently
 # across dev / qa / prod.
@@ -17,7 +17,7 @@
 # =============================================================================
 
 bundle:
-  name: fe-dqx
+  name: fe-udp-migration
 include:
   - resources/*.yml
 
@@ -32,23 +32,23 @@ variables:
     description: "Gold Aggregated Business Catalog (shared across all source systems)"
 
   # -- Per-source-system bronze schemas --
-  bronze_schema_sap:
-    description: "Bronze schema for SAP source system"
-  bronze_schema_esri:
-    description: "Bronze schema for ESRI Vegetation source system"
+  bronze_schema_oracis01p:
+    description: "Bronze schema for Oracle CIS source system."
+  bronze_schema_sfcrm01p:
+    description: "Bronze schema for Salesforce CRM source system."
 
   # -- Per-source-system silver schemas --
-  silver_schema_sap:
-    description: "Silver schema for SAP source system"
-  silver_schema_esri:
-    description: "Silver schema for ESRI Vegetation source system"
+  silver_schema_oracis01p:
+    description: "Silver schema for Oracle CIS source system."
+  silver_schema_sfcrm01p:
+    description: "Silver schema for Salesforce CRM source system."
 
 
   # -- Per-source-system gold schemas --
   gold_schema_customer:
-    description: "Gold schema for SAP source system"
+    description: "Gold schema for Customer domain."
   gold_schema_wmi:
-    description: "Gold schema for ESRI Vegetation source system"
+    description: "Gold schema for WMI domain."
 
   # -- Shared infrastructure schemas (DQX quarantine + metrics) --
   quarantine_catalog:
@@ -74,6 +74,17 @@ variables:
 workspace:
   root_path: ${var.root_path}
 
+permissions:
+  - level: CAN_MANAGE
+    user_name: ${workspace.current_user.userName}
+
+  # - level: CAN_VIEW
+  #   group_name: group_name
+
+presets:
+  trigger_pause_status: PAUSED # If this bundle creates Jobs, their schedules will be paused.
+
+
 # ─── TARGETS / ENVIRONMENTS ──────────────────────────────────────────────────
 targets:
   # dev — personal development sandbox
@@ -92,12 +103,12 @@ targets:
       gold_catalog: "sandbox"
 
       # Per-source-system bronze schemas 
-      bronze_schema_sap: "ss_bronze"
-      bronze_schema_esri: "ss_bronze"
+      bronze_schema_oracis01p: "ss_bronze" ## change to ss_bronze_sap
+      bronze_schema_sfcrm01p: "ss_bronze" ## change to ss_bronze_oracle
 
       # Per-source-system silver schemas 
-      silver_schema_sap: "ss_silver"
-      silver_schema_esri: "ss_silver"
+      silver_schema_oracis01p: "ss_silver"
+      silver_schema_sfcrm01p: "ss_silver"
 
       # Per-source-system gold schemas
       gold_schema_customer: "ss_customer"
@@ -122,17 +133,14 @@ targets:
       gold_catalog: ""
 
  
-      bronze_schema_webp: "webp"
-      bronze_schema_esriveg01p: "esriveg01p"
-      bronze_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+      bronze_schema_oracis01p: "bronze_oracle_cis"
+      bronze_schema_sfcrm01p: "bronze_salesforce_crm"
 
-      silver_schema_webp: "webp"
-      silver_schema_esriveg01p: "esriveg01p"
-      silver_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+      silver_schema_oracis01p: "silver_oracle_cis"
+      silver_schema_sfcrm01p: "silver_salesforce_crm"
 
-      gold_schema_webp: "webp"
-      gold_schema_esriveg01p: "esriveg01p"
-      gold_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+      gold_schema_customer: "gold_oracle_cis"
+      gold_schema_wmi: "gold_salesforce_crm"
 
       quarantine_catalog: ""
       quarantine_schema: ""
@@ -152,17 +160,14 @@ targets:
       gold_catalog: ""
 
 
-      bronze_schema_webp: "webp"
-      bronze_schema_esriveg01p: "esriveg01p"
-      bronze_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+      bronze_schema_oracis01p: "bronze_oracle_cis"
+      bronze_schema_sfcrm01p: "bronze_salesforce_crm"
 
-      silver_schema_webp: "webp"
-      silver_schema_esriveg01p: "esriveg01p"
-      silver_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+      silver_schema_oracis01p: "silver_oracle_cis"
+      silver_schema_sfcrm01p: "silver_salesforce_crm"
 
-      gold_schema_webp: "webp"
-      gold_schema_esriveg01p: "esriveg01p"
-      gold_schema_ssp_lifecycle01p: "ssp_lifecycle01p"
+      gold_schema_customer: "gold_oracle_cis"
+      gold_schema_wmi: "gold_salesforce_crm"
 
       quarantine_catalog: ""
       quarantine_schema: ""

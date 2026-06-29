@@ -3,7 +3,7 @@ resources:
   pipelines:
 
     customer_gold_pipeline:
-      name: "customer Gold Pipeline"
+      name: "customer CIS Gold Pipeline"
       catalog: ${var.gold_catalog}
       target: ${var.gold_schema_customer}
       photon: true
@@ -14,7 +14,7 @@ resources:
       configuration:
         pipelines.incompatibleViewCheck.enabled: "false"
         pipeline.silver_catalog: ${var.silver_catalog}
-        pipeline.silver_schema: ${var.silver_schema_sap}
+        pipeline.silver_schema: ${var.silver_schema_oracis01p}
         pipeline.gold_catalog: ${var.gold_catalog}
         pipeline.gold_schema: ${var.gold_schema_customer}
         pipeline.source_system: "customer"

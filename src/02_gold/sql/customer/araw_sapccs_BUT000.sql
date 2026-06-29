@@ -1,1 +1,0 @@
-SELECT * FROM __silver__.sapeast_BUT000
