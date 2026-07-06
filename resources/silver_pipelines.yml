@@ -81,18 +81,18 @@ resources:
 
     # Optional: Global DQX Governance Pipeline
     # Uncomment when you want to aggregate metrics across all source-system pipelines.
-    #
-    # global_dqx_governance_pipeline:
-    #   name: "Global DQX Governance Pipeline"
-    #   catalog: ${var.metrics_catalog}
-    #   target: ${var.metrics_schema}
-    #   photon: true
-    #   serverless: true
-    #
-    #   libraries:
-    #     - notebook:
-    #         path: ../src/03_monitoring/dqx_summary_metrics.py
-    #
-    #   configuration:
-    #     pipeline.metrics_catalog: ${var.metrics_catalog}
-    #     pipeline.metrics_schema: ${var.metrics_schema}
+    
+    global_dqx_governance_pipeline:
+      name: "Global DQX Governance Pipeline"
+      catalog: ${var.metrics_catalog}
+      target: ${var.metrics_schema}
+      photon: true
+      serverless: true
+    
+      libraries:
+        - notebook:
+            path: ../src/03_monitoring/dqx_summary_metrics.py
+    
+      configuration:
+        pipeline.metrics_catalog: ${var.metrics_catalog}
+        pipeline.metrics_schema: ${var.metrics_schema}
