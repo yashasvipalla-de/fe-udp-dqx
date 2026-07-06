@@ -12,7 +12,7 @@ resources:
 
       libraries:
         - notebook:
-            path: ../src/01_silver/silver.ipynb
+            path: ../src/01_silver/silver.py
 
       configuration:
         pipelines.incompatibleViewCheck.enabled: "false"
@@ -91,7 +91,7 @@ resources:
     
       libraries:
         - notebook:
-            path: ../src/03_monitoring/dqx_summary_metrics.ipynb
+            path: ../src/03_monitoring/dqx_summary_metrics.py
     
       configuration:
         pipeline.metrics_catalog: ${var.metrics_catalog}

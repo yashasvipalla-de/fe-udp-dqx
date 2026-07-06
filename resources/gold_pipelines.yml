@@ -11,7 +11,7 @@ resources:
 
       libraries:
         - notebook:
-            path: ../src/02_gold/gold.ipynb
+            path: ../src/02_gold/gold.py
 
       configuration:
         pipelines.incompatibleViewCheck.enabled: "false"
