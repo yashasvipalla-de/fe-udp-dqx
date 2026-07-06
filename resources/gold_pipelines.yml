@@ -3,21 +3,36 @@ resources:
   pipelines:
 
     customer_gold_pipeline:
-      name: "customer Gold Pipeline"
+      name: "customer CIS Gold Pipeline"
       catalog: ${var.gold_catalog}
       target: ${var.gold_schema_customer}
       photon: true
       serverless: true
+
       libraries:
         - notebook:
-            path: ../src/02_gold/gold.py
+            path: ../src/02_gold/gold.ipynb
+
       configuration:
         pipelines.incompatibleViewCheck.enabled: "false"
+
         pipeline.silver_catalog: ${var.silver_catalog}
-        pipeline.silver_schema: ${var.silver_schema_sap}
+        pipeline.silver_schema: ${var.silver_schema_oracis01p}
+
         pipeline.gold_catalog: ${var.gold_catalog}
         pipeline.gold_schema: ${var.gold_schema_customer}
-        pipeline.source_system: "customer"
+
+        pipeline.quarantine_catalog: ${var.quarantine_catalog}
+        pipeline.quarantine_schema: ${var.quarantine_schema}
+
+        pipeline.metrics_catalog: ${var.metrics_catalog}
+        pipeline.metrics_schema: ${var.metrics_schema}
+
+        pipeline.source_system: "customer" #### change it to domain
+
+      environment:
+        dependencies:
+          - -r ../requirements.txt
 
     # ─── ESRI VEGETATION GOLD PIPELINE ───
     # Uncomment when ready to onboard esriveg01p gold tables.
@@ -32,7 +47,7 @@ resources:
     #   serverless: true
     #   libraries:
     #     - notebook:
-    #         path: ../src/02_gold/gold.py
+    #         path: ../src/02_gold/gold.ipynb
     #   configuration:
     #     pipelines.incompatibleViewCheck.enabled: "false"
     #     pipeline.silver_catalog: ${var.silver_catalog}
@@ -40,25 +55,3 @@ resources:
     #     pipeline.gold_catalog: ${var.gold_catalog}
     #     pipeline.gold_schema: ${var.gold_schema_esriveg01p}
     #     pipeline.source_system: "esriveg01p"
-
-    # ─── SSP LIFECYCLE GOLD PIPELINE ───
-    # Uncomment when ready to onboard ssp_lifecycle01p gold tables.
-    # Requires: config/gold.yml entry under "ssp_lifecycle01p",
-    #           src/02_gold/sql/ssp_lifecycle01p/<table>.sql
-    #
-    # ssp_lifecycle01p_gold_pipeline:
-    #   name: "SSP Lifecycle Gold Pipeline"
-    #   catalog: ${var.gold_catalog}
-    #   target: ${var.gold_schema_ssp_lifecycle01p}
-    #   photon: true
-    #   serverless: true
-    #   libraries:
-    #     - notebook:
-    #         path: ../src/02_gold/gold.py
-    #   configuration:
-    #     pipelines.incompatibleViewCheck.enabled: "false"
-    #     pipeline.silver_catalog: ${var.silver_catalog}
-    #     pipeline.silver_schema: ${var.silver_schema_ssp_lifecycle01p}
-    #     pipeline.gold_catalog: ${var.gold_catalog}
-    #     pipeline.gold_schema: ${var.gold_schema_ssp_lifecycle01p}
-    #     pipeline.source_system: "ssp_lifecycle01p"

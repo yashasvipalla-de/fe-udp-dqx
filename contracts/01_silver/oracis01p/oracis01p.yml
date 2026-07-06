@@ -1,0 +1,294 @@
+kind: DataContract
+apiVersion: v3.0.2
+id: urn:datacontract:sandbox:firstenergy:oracle01p
+name: Oracle Customer Data Contract
+version: 1.0.0
+status: active
+domain: sandbox
+dataProduct: oracle01p
+
+description:
+  purpose: Customer account and profile records processed from Bronze to Silver with DQX validation.
+  text: Applies source-level data quality checks for oracle01p customer account and profile tables.
+
+schema:
+  # -------------------------------------------------------------------
+  # CUSTOMER_ACCOUNT
+  # -------------------------------------------------------------------
+  - name: customer_account
+    physicalType: table
+    description: Customer account details from oracle01p.
+
+    properties:
+      - name: ACCOUNT_ID
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: Unique customer account identifier.
+        quality:
+          - type: custom
+            engine: dqx
+            description: ACCOUNT_ID must be populated and follow format ACC followed by 4 digits.
+            implementation:
+              name: customer_account_account_id_format
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "ACCOUNT_ID IS NOT NULL AND TRIM(ACCOUNT_ID) RLIKE '^ACC[0-9]{4}$'"
+
+      - name: CUSTOMER_ID
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: Customer identifier linked to the account.
+        quality:
+          - type: custom
+            engine: dqx
+            description: CUSTOMER_ID must be populated and follow format CUST followed by 3 digits.
+            implementation:
+              name: customer_account_customer_id_format
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "CUSTOMER_ID IS NOT NULL AND TRIM(CUSTOMER_ID) RLIKE '^CUST[0-9]{3}$'"
+
+      - name: ACCOUNT_STATUS
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: Current account status.
+        quality:
+          - type: custom
+            engine: dqx
+            description: ACCOUNT_STATUS must be ACTIVE, INACTIVE, or CLOSED.
+            implementation:
+              name: customer_account_status_allowed_values
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "ACCOUNT_STATUS IS NOT NULL AND UPPER(TRIM(ACCOUNT_STATUS)) IN ('ACTIVE', 'INACTIVE', 'CLOSED')"
+
+      - name: SERVICE_STATE
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: State where service is provided.
+        quality:
+          - type: custom
+            engine: dqx
+            description: SERVICE_STATE must be a valid two-character state code.
+            implementation:
+              name: customer_account_service_state_format
+              criticality: warn
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "SERVICE_STATE IS NOT NULL AND SERVICE_STATE RLIKE '^[A-Z]{2}$'"
+
+      - name: OPEN_DATE
+        logicalType: date
+        physicalType: DATE
+        required: true
+        description: Date when the account was opened.
+        quality:
+          - type: custom
+            engine: dqx
+            description: OPEN_DATE must be populated and cannot be in the future.
+            implementation:
+              name: customer_account_open_date_not_future
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "OPEN_DATE IS NOT NULL AND OPEN_DATE <= current_date()"
+
+  # -------------------------------------------------------------------
+  # CUSTOMER_PROFILE
+  # -------------------------------------------------------------------
+  - name: customer_profile
+    physicalType: table
+    description: Customer profile details from Oracle oracle01p.
+
+    properties:
+      - name: CUSTOMER_ID
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: Unique customer identifier.
+        quality:
+          - type: custom
+            engine: dqx
+            description: CUSTOMER_ID must be populated and follow format CUST followed by 3 digits.
+            implementation:
+              name: customer_profile_customer_id_format
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "CUSTOMER_ID IS NOT NULL AND TRIM(CUSTOMER_ID) RLIKE '^CUST[0-9]{3}$'"
+
+      - name: FIRST_NAME
+        logicalType: string
+        physicalType: STRING
+        required: false
+        description: Customer first name.
+
+      - name: LAST_NAME
+        logicalType: string
+        physicalType: STRING
+        required: false
+        description: Customer last name.
+
+      - name: ORG_NAME
+        logicalType: string
+        physicalType: STRING
+        required: false
+        description: Organization name for business customers.
+
+      - name: CUSTOMER_TYPE
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: Customer type.
+        quality:
+          - type: custom
+            engine: dqx
+            description: CUSTOMER_TYPE must be RESIDENTIAL or BUSINESS.
+            implementation:
+              name: customer_profile_customer_type_allowed_values
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "CUSTOMER_TYPE IS NOT NULL AND UPPER(TRIM(CUSTOMER_TYPE)) IN ('RESIDENTIAL', 'BUSINESS')"
+
+          - type: custom
+            engine: dqx
+            description: Residential customers must have first and last name. Business customers must have organization name.
+            implementation:
+              name: customer_profile_name_required_by_type
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: >
+                    (
+                      UPPER(TRIM(CUSTOMER_TYPE)) = 'RESIDENTIAL'
+                      AND FIRST_NAME IS NOT NULL
+                      AND TRIM(FIRST_NAME) <> ''
+                      AND LAST_NAME IS NOT NULL
+                      AND TRIM(LAST_NAME) <> ''
+                    )
+                    OR
+                    (
+                      UPPER(TRIM(CUSTOMER_TYPE)) = 'BUSINESS'
+                      AND ORG_NAME IS NOT NULL
+                      AND TRIM(ORG_NAME) <> ''
+                    )
+
+  # -------------------------------------------------------------------
+  # CUSTOMER_EMAIL_CONTACT
+  # -------------------------------------------------------------------
+  - name: customer_email_contact
+    physicalType: table
+    description: Customer email contact details from Salesforce CRM.
+
+    properties:
+      - name: ACCOUNT_ID
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: Customer account identifier.
+        quality:
+          - type: custom
+            engine: dqx
+            description: ACCOUNT_ID must be populated and follow format ACC followed by 4 digits.
+            implementation:
+              name: customer_email_contact_account_id_format
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "ACCOUNT_ID IS NOT NULL AND TRIM(ACCOUNT_ID) RLIKE '^ACC[0-9]{4}$'"
+
+      - name: EMAIL_ADDRESS
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: Customer email address.
+        quality:
+          - type: custom
+            engine: dqx
+            description: EMAIL_ADDRESS must be populated.
+            implementation:
+              name: customer_email_contact_email_required
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "EMAIL_ADDRESS IS NOT NULL AND TRIM(EMAIL_ADDRESS) <> ''"
+
+          - type: custom
+            engine: dqx
+            description: EMAIL_ADDRESS must match a valid email format.
+            implementation:
+              name: customer_email_contact_email_format
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "EMAIL_ADDRESS RLIKE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'"
+
+      - name: EMAIL_STATUS
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: Email status value.
+        quality:
+          - type: custom
+            engine: dqx
+            description: EMAIL_STATUS must be VALID, INVALID, BOUNCED, or OPTED_OUT.
+            implementation:
+              name: customer_email_contact_email_status_allowed_values
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "EMAIL_STATUS IS NOT NULL AND UPPER(TRIM(EMAIL_STATUS)) IN ('VALID', 'INVALID', 'BOUNCED', 'OPTED_OUT')"
+
+      - name: PREFERRED_EMAIL_FLAG
+        logicalType: string
+        physicalType: STRING
+        required: true
+        description: Indicates whether this is the preferred email address.
+        quality:
+          - type: custom
+            engine: dqx
+            description: PREFERRED_EMAIL_FLAG must be Y or N.
+            implementation:
+              name: customer_email_contact_preferred_flag_allowed_values
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "PREFERRED_EMAIL_FLAG IS NOT NULL AND UPPER(TRIM(PREFERRED_EMAIL_FLAG)) IN ('Y', 'N')"
+
+      - name: UPDATED_AT
+        logicalType: timestamp
+        physicalType: TIMESTAMP
+        required: true
+        description: Timestamp when the email record was last updated.
+        quality:
+          - type: custom
+            engine: dqx
+            description: UPDATED_AT must be populated and cannot be in the future.
+            implementation:
+              name: customer_email_contact_updated_at_not_future
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "UPDATED_AT IS NOT NULL AND UPDATED_AT <= current_timestamp()"

@@ -1,0 +1,87 @@
+kind: DataContract
+apiVersion: v3.0.2
+id: urn:datacontract:sandbox:firstenergy:customer_gold
+name: Customer Gold Data Contract
+version: 1.0.0
+status: active
+domain: customer
+dataProduct: customer_gold
+
+description:
+  purpose: Business-level validation for customer gold materialized views.
+  text: Applies selected business quality checks after Silver-to-Gold transformations.
+
+schema:
+  - name: customer_contact_summary
+    physicalType: table
+    description: Customer contact summary gold materialized view.
+
+    properties:
+      - name: CUSTOMER_ID
+        logicalType: string
+        physicalType: STRING
+        required: true
+        quality:
+          - type: custom
+            engine: dqx
+            description: CUSTOMER_ID must be populated.
+            implementation:
+              name: customer_contact_summary_customer_id_required
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "CUSTOMER_ID IS NOT NULL AND TRIM(CUSTOMER_ID) <> ''"
+
+      - name: EMAIL_ADDRESS
+        logicalType: string
+        physicalType: STRING
+        required: false
+        quality:
+          - type: custom
+            engine: dqx
+            description: EMAIL_ADDRESS must be valid when populated.
+            implementation:
+              name: customer_contact_summary_email_format
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "EMAIL_ADDRESS IS NULL OR EMAIL_ADDRESS RLIKE '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'"
+
+  - name: customer_account_profile_summary
+    physicalType: table
+    description: Customer account profile summary gold materialized view.
+
+    properties:
+      - name: ACCOUNT_ID
+        logicalType: string
+        physicalType: STRING
+        required: true
+        quality:
+          - type: custom
+            engine: dqx
+            description: ACCOUNT_ID must be populated.
+            implementation:
+              name: customer_account_profile_summary_account_id_required
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "ACCOUNT_ID IS NOT NULL AND TRIM(ACCOUNT_ID) <> ''"
+
+      - name: CUSTOMER_DISPLAY_NAME
+        logicalType: string
+        physicalType: STRING
+        required: true
+        quality:
+          - type: custom
+            engine: dqx
+            description: CUSTOMER_DISPLAY_NAME must be populated.
+            implementation:
+              name: customer_account_profile_summary_display_name_required
+              criticality: error
+              check:
+                function: sql_expression
+                arguments:
+                  expression: "CUSTOMER_DISPLAY_NAME IS NOT NULL AND TRIM(CUSTOMER_DISPLAY_NAME) <> ''"

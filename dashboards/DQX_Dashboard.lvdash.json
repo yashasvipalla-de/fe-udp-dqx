@@ -110,7 +110,7 @@
         "    count,\n",
         "    ROUND((count * 100.0) / total.total_count, 2) AS percentage\n",
         "FROM combined, total\n",
-        "ORDER BY category, count DESC;"
+        "ORDER BY category, count DESC;sandbox.ss_quality_monitoring.oracis01p_quality_metrics"
       ],
       "parameters": [
         {
@@ -1898,7 +1898,7 @@
               {
                 "name": "main_query",
                 "query": {
-                  "datasetName": "cca849d2",
+                  "datasetName": "2d9fe698",
                   "fields": [
                     {
                       "name": "countdistinct(Table Name)",
@@ -1911,12 +1911,6 @@
             ],
             "spec": {
               "version": 2,
-              "widgetType": "counter",
-              "encodings": {
-                "value": {
-                  "fieldName": "countdistinct(Table Name)"
-                }
-              },
               "frame": {
                 "title": "Total Tables Observed for Quality",
                 "showTitle": true,
@@ -1927,6 +1921,15 @@
                 "fontColor": {
                   "light": "#111C11"
                 }
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(Table Name)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
               }
             },
             "specExtensions": {
