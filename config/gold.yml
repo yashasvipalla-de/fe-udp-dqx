@@ -11,24 +11,87 @@
 tables:
   customer:
     customer_contact_summary:
+      description: "Gold customer contact summary combining account, profile, and preferred email details."
       operation_type: materialized_view
       source_tables:
         - customer_account
         - customer_profile
         - customer_email_contact
       target_table: customer_contact_summary
-      sql_file: customer_contact_summary.sql
+
+      apply_dqx: true
+      contract_file: customer.yml
 
       sql_parameters:
         HASH_BITS: "256"
         ACCOUNT_FILTER: "ACCOUNT.ACCOUNT_STATUS = 'ACTIVE'"
         EMAIL_FILTER: "EMAIL.EMAIL_STATUS = 'VALID' AND EMAIL.PREFERRED_EMAIL_FLAG = 'Y'"
 
-
     customer_account_profile_summary:
+      description: "Gold customer account and profile summary for active customer accounts."
       operation_type: materialized_view
       source_tables:
         - customer_account
         - customer_profile
       target_table: customer_account_profile_summary
-      sql_file: customer_account_profile_summary.sql
+
+      apply_dqx: true
+      contract_file: customer.yml
+
+
+    ##############################################
+    #############  delta_type1 ###################
+    ##############################################
+    customer_email_contact_current:
+      description: "Gold materialized view exposing the latest customer email contact record per account, backed by an internal Type 1 CDC table."
+      operation_type: delta_type1
+
+      source_table: customer_email_contact
+
+      # Final consumer-facing Gold object
+      target_table: customer_email_contact_current
+
+      # Internal streaming table used only by CDC flow
+      cdc_target_table: customer_email_contact_current_cdc_internal
+
+      keys:
+        - ACCOUNT_ID
+
+      sequence_by: UPDATED_AT
+
+      # apply_dqx: true
+
+      except_columns:
+        - processed_time
+    
+
+    ##############################################
+    #############  delta_type2 / SCD2 ############
+    ##############################################
+    customer_email_contact_history:
+      description: "Gold SCD Type 2 materialized view preserving customer email contact history by account."
+      operation_type: delta_type2
+
+      source_table: customer_email_contact
+
+      # Final consumer-facing Gold materialized view
+      target_table: customer_email_contact_history
+
+      # Internal streaming table used by CDC flow
+      cdc_target_table: customer_email_contact_history_cdc_internal
+
+      keys:
+        - ACCOUNT_ID
+
+      sequence_by: UPDATED_AT
+
+      # apply_dqx: true
+
+      except_columns:
+        - processed_time ## That prevents processed_time from being treated as meaningful business change.
+      
+      # If you want to be explicit about which columns create a new historical row:
+      # track_history_columns:
+      #   - EMAIL_ADDRESS
+      #   - EMAIL_STATUS
+      #   - PREFERRED_EMAIL_FLAG

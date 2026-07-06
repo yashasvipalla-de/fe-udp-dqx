@@ -17,7 +17,7 @@
 # =============================================================================
 
 bundle:
-  name: fe-udp-migration
+  name: fe-udp-singlestore-migration
 include:
   - resources/*.yml
 

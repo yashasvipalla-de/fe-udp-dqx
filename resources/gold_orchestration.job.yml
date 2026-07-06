@@ -1,43 +1,31 @@
-# # resources/gold_orchestration.job.yml
-# # ─────────────────────────────────────────────────────────────────────
-# # Gold Orchestration
-# # Gold pipeline → Tag gold tables
-# # ─────────────────────────────────────────────────────────────────────
-# resources:
-#   jobs:
+# resources/gold_orchestration.job.yml
+# ─────────────────────────────────────────────────────────────────────
+# Gold Orchestration
+# Gold pipeline
+# ─────────────────────────────────────────────────────────────────────
+resources:
+  jobs:
 
-#     gold_orchestration:
-#       name: "Crew Mgmt — Gold Pipeline + Tagging"
+    gold_orchestration:
+      name: "SingleStore — Gold Pipeline"
 
-#       # ── Schedule (uncomment and adjust as needed) ─────────────────
-#       # schedule:
-#       #   quartz_cron_expression: "0 0 6 * * ?"   # Daily at 6:00 AM
-#       #   timezone_id: "America/New_York"
-#       #   pause_status: "UNPAUSED"
+      # ── Schedule (uncomment and adjust as needed) ─────────────────
+      # schedule:
+      #   quartz_cron_expression: "0 0 6 * * ?"   # Daily at 6:00 AM
+      #   timezone_id: "America/New_York"
+      #   pause_status: "UNPAUSED"
 
-#       # ── Notifications (uncomment to enable) ───────────────────────
-#       # email_notifications:
-#       #   on_failure:
-#       #     - team-data-engineering@fenetwork.com
+      # ── Notifications (uncomment to enable) ───────────────────────
+      # email_notifications:
+      #   on_failure:
+      #     - yashasvi.palla@fenetwork.com
 
-#       # ── Retry / timeout (uncomment to enable) ─────────────────────
-#       # max_concurrent_runs: 1
-#       # timeout_seconds: 7200  # 2 hours
+      # ── Retry / timeout (uncomment to enable) ─────────────────────
+      # max_concurrent_runs: 1
+      # timeout_seconds: 7200  # 2 hours
 
-#       tasks:
+      tasks:
 
-#         - task_key: "run_gold_pipeline"
-#           pipeline_task:
-#             pipeline_id: ${resources.pipelines.webp_ivmsp_gold_pipeline.id}
-
-#         - task_key: "tag_gold_tables"
-#           depends_on:
-#             - task_key: "run_gold_pipeline"
-#           notebook_task:
-#             notebook_path: ../src/04_governance/apply_uc_tags.py
-#             base_parameters:
-#               layer: "gold"
-#               catalog: ${var.gold_catalog}
-#               schema: ${var.gold_schema_webp}
-#               config_path: "config/gold.yml"
-#               source_system: "webp_ivmsp"
+        - task_key: "run_gold_pipeline"
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.customer_gold_pipeline.id}
