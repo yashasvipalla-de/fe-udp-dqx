@@ -70,9 +70,6 @@ variables:
   service_principal:
     description: "Service principal application ID for non-dev deployments."
     default: ""
-  developer:
-    description: "Short alias for the developer, used to isolate dev schemas"
-    default: ""
   dev_schema:
     description: "Single unified schema for dev deployments. All layers resolve here."
     default: ""
@@ -98,6 +95,7 @@ targets:
   # All source-system schemas collapse to shared sbx_* schemas for convenience.
   dev:
     default: true
+    mode: development
     resources:
       schemas:
         dev:
@@ -110,7 +108,7 @@ targets:
       cluster_policy_id: ""
       service_principal: ""
 
-      dev_schema: "ss_dev_michael_klinkhammer"
+      dev_schema: "ss_dev"
 
       # Shared catalogs — all point to sandbox in dev
       bronze_catalog: "sandbox"
@@ -131,7 +129,6 @@ targets:
       quarantine_schema: "${var.dev_schema}"
       metrics_schema: "${var.dev_schema}"
 
-      developer: "michael_klinkhammer"
 
   # qa — staging / pre-production
   qa:
