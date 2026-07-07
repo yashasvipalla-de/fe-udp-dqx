@@ -96,6 +96,8 @@ targets:
   dev:
     default: true
     mode: development
+    presets:
+      name_prefix: ''   # disable auto dev-prefix
     resources:
       schemas:
         dev:
@@ -108,7 +110,7 @@ targets:
       cluster_policy_id: ""
       service_principal: ""
 
-      dev_schema: "ss_dev"
+      dev_schema: "${workspace.current_user.short_name}_ss_dev"
 
       # Shared catalogs — all point to sandbox in dev
       bronze_catalog: "sandbox"
