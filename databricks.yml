@@ -120,6 +120,45 @@ targets:
       metrics_catalog: "sandbox"
       metrics_schema: "ss_quality_monitoring"
 
+  ##########################################################################################################
+  ##### To create developer-specific schemas to avoid table write conflicts owned by a different person ####
+  ##########################################################################################################
+  # dev:
+  #   default: true
+  #   mode: development
+
+  #   resources:
+  #     schemas:
+  #       dev:
+  #         catalog_name: ${var.bronze_catalog}
+  #         name: udp
+  #         comment: "Unified developer schema for ${workspace.current_user.userName}"
+
+  #   variables:
+  #     root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/dev
+  #     cluster_policy_id: ""
+  #     service_principal: ""
+
+  #     # Shared catalogs
+  #     bronze_catalog: "sandbox"
+  #     silver_catalog: "sandbox"
+  #     gold_catalog: "sandbox"
+  #     quarantine_catalog: "sandbox"
+  #     metrics_catalog: "sandbox"
+
+  #     # Bronze stays shared/source-owned
+  #     bronze_schema_oracis01p: "ss_bronze"
+  #     bronze_schema_sfcrm01p: "ss_bronze"
+
+  #     # Use the actual created schema resource name.
+  #     # In development mode, this will resolve to the prefixed schema name.
+  #     silver_schema_oracis01p: ${resources.schemas.dev.name}
+  #     silver_schema_sfcrm01p: ${resources.schemas.dev.name}
+  #     gold_schema_customer: ${resources.schemas.dev.name}
+  #     gold_schema_wmi: ${resources.schemas.dev.name}
+  #     quarantine_schema: ${resources.schemas.dev.name}
+  #     metrics_schema: ${resources.schemas.dev.name}
+
   # qa — staging / pre-production
   qa:
     mode: production
