@@ -70,6 +70,10 @@ variables:
   service_principal:
     description: "Service principal application ID for non-dev deployments."
     default: ""
+  dev_schema:
+    description: "Single unified schema for dev deployments. All layers resolve here."
+    default: ""
+
 
 workspace:
   root_path: ${var.root_path}
@@ -92,33 +96,41 @@ targets:
   dev:
     default: true
     mode: development
+    presets:
+      name_prefix: ''   # disable auto dev-prefix
+    resources:
+      schemas:
+        dev:
+          catalog_name: ${var.bronze_catalog}
+          name: ${var.dev_schema}
+          comment: "Unified dev schema — all layers and source systems"
+
     variables:
       root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/dev
       cluster_policy_id: ""
       service_principal: ""
 
-      # Shared catalogs
+      dev_schema: "${workspace.current_user.short_name}_ss_dev"
+
+      # Shared catalogs — all point to sandbox in dev
       bronze_catalog: "sandbox"
       silver_catalog: "sandbox"
       gold_catalog: "sandbox"
-
-      # Per-source-system bronze schemas 
-      bronze_schema_oracis01p: "ss_bronze" ## change to ss_bronze_sap
-      bronze_schema_sfcrm01p: "ss_bronze" ## change to ss_bronze_oracle
-
-      # Per-source-system silver schemas 
-      silver_schema_oracis01p: "ss_silver"
-      silver_schema_sfcrm01p: "ss_silver"
-
-      # Per-source-system gold schemas
-      gold_schema_customer: "ss_customer"
-      gold_schema_wmi: "ss_wmi"
-
-      # Shared infrastructure
       quarantine_catalog: "sandbox"
-      quarantine_schema: "ss_quarantine"
       metrics_catalog: "sandbox"
-      metrics_schema: "ss_quality_monitoring"
+
+      # Bronze stays separate — it is source data, not created by these pipelines
+      bronze_schema_oracis01p: "ss_bronze"
+      bronze_schema_sfcrm01p: "ss_bronze"
+
+      # Silver, gold, quarantine, metrics all collapse to the single dev schema
+      silver_schema_oracis01p: "${var.dev_schema}"
+      silver_schema_sfcrm01p: "${var.dev_schema}"
+      gold_schema_customer: "${var.dev_schema}"
+      gold_schema_wmi: "${var.dev_schema}"
+      quarantine_schema: "${var.dev_schema}"
+      metrics_schema: "${var.dev_schema}"
+
 
   ##########################################################################################################
   ##### To create developer-specific schemas to avoid table write conflicts owned by a different person ####
